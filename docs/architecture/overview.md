@@ -2,22 +2,23 @@
 
 ![System Overview](https://raw.githubusercontent.com/dmlc/dmlc.github.io/master/img/mxnet/system/overview.png)
 
-Above image shows major modules/components of the MXNet system and their interaction. The modules are:
+The preceding image shows the major modules/components of the MXNet system and their interaction. The modules are:
+
 - Runtime Dependency Engine: Schedules and executes the
   operations according to their read/write dependency.
-- Storage Allocator: Efficiently allocate and recycles memory blocks for GPU and
-  CPU.
-- Resource Manager: Manage global resources such as random number generator, temporal space.
-- NDArray: Dynamic asynchronous n-dimensional arrays, provide flexible
+- Storage Allocator: Efficiently allocates and recycles memory blocks for GPU and
+  CPU processors.
+- Resource Manager: Manages global resources, such as random number generator and temporal space.
+- NDArray: Dynamic asynchronous n-dimensional arrays, which provide flexible
   imperative programs for MXNet.
-- Symbolic Execution: Static symbolic graph executor, provide efficient symbolic
+- Symbolic Execution: Static symbolic graph executor, which provides efficient symbolic
   graph execution and optimization.
 - Operator: Operators that defines static forward and gradient
-  calculation(backprop).
+  calculation (backprop).
 - SimpleOp: Operators that extend to NDArray operators and symbolic operators
   in a unified fashion.
-- Symbol Construction: Symbolic construction, provide a way to construct
-  computation graph(net configuration)
+- Symbol Construction: Symbolic construction, which provides a way to construct
+  computation graph (net configuration).
 - KVStore: Key-value store interface for easy parameter synchronizations.
 - Data Loading(IO): Efficient distributed data loading and augmentation.
 
@@ -274,7 +275,7 @@ It is possible that one convolution has several implementations and users want t
   virtual int NumVisibleOutputs() const;
   ```
 
-### Create Operator from Operator Property
+### Create an Operator from Operator Property
 
 As mentioned above `OperatorProperty` includes all *semantical* attributes of an operation. It is also in charge of creating `Operator` pointer for actual computation.
 
@@ -339,7 +340,7 @@ MXNET_REGISTER_OP_PROPERTY(Convolution, ConvolutionOpProperty);
 ```
 The first argument to the macro is the name string, the second is the property class name.
 
-### All in a list
+### All in a List
 
 Finally! We almost covered the interface we needed to define a new operator. Let's do a recap in a list:
 * Use `Operator` interface to write your actual computation logic (`Forward` and `Backward`).
@@ -353,7 +354,7 @@ Finally! We almost covered the interface we needed to define a new operator. Let
   - [Optional] If inplace update is supported, check `ForwardInplaceOption` and `BackwardInplaceOption`.
 * Register the `OperatorProperty` class and the parameter class.
 
-## Unifying NDArray Operator and Symbolic Operator : How does it work
+## Unifying NDArray Operator and Symbolic Operator 
 NDArray operations are similar to symbolic operations except the fact that sometimes we 
 cannot write in place to the operands without a complete dependency graph. However, the 
 logics underlying NDArray and Symbolic operation are almost the same. Unifying different 
@@ -590,7 +591,7 @@ discussed in additional information.
 * Register the operator using registration process
 
 ## Additional Information on SimpleOp
-### Usage on `EnvArguments`
+### Using SimpleOp on `EnvArguments`
 Some operations may need a scalar as input, such as gradient scale, a set of keyword arguments 
 controlling behavior or a temporary space to speed up calculations.
 `EnvArguments` provide additional arguments and resources to make calculations more scalable 
@@ -672,7 +673,7 @@ The gradient is similar, which can be found in `src/operator/smooth_l1_unary-inl
 This new unified API is designed to fulfil the fundamentals of an operation. For operators with more than two inputs, 
 more than one outputs, or in need of more features, please refer to the original [Operator API](operator.md).
 
-## KVStore: Multi-devices and multi-machines
+## KVStore: Multiple Devices and Multiple Machines
 
 ### Introduction
 
@@ -717,7 +718,7 @@ workers. And
   larger delay often improves the performance, but may slows down the
   convergence.
 
-### Multiple devices on a single machine
+### Multiple Devices on a Single Machine
 
 KV store `local` synchronizes data over multiple devices on a single machine.
 It gives the same results (e.g. model accuracy) as the single device case. But
@@ -758,7 +759,7 @@ They produce (almost) the same results, but may vary on speed.
   step. It is faster than 2 when the gradients are huge. But it requires more
   device memory.
 
-### Multiple machines
+### Multiple Machines
 
 Both `dist_async` and `dist_sync` can handle the multiple machines
 situation. But they are different on both semantic and performance.
@@ -775,7 +776,7 @@ situation. But they are different on both semantic and performance.
   model reduces the machine synchronization cost and therefore could improve the
   system performance. But it may harm the convergence speed.
 
-# Recommended Next Steps
+## Next Steps
 
 * [Analogy to other DL systems](http://mxnet.io/architecture/analogy.html)
 * [How to read MXNet code](http://mxnet.io/architecture/read_code.html)
