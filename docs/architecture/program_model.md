@@ -1,13 +1,13 @@
 # Programming Models for Deep Learning
 
 There are a lot of deep learning libraries, each with its own flavor.
-How can each flavour introduced by each library provide advantages or drawbacks in terms of system optimization and user experience?
-This article aims to compare these flavours in terms of programming models, discuss the fundamental advantages and drawbacks
-introduced by these models, and how we can learn from them.
+What are the advantages and drawbacks of each library in terms of system optimization and user experience?
+This topic compares the programming models, discusses the fundamental advantages and drawbacks
+introduced by the models, and explores how we can learn from them.
 
-We will focus on the programming model itself instead of the implementations. So this article is not about benchmarking
-deep learning libraries. Instead, we will divide the libraries into several categories in terms of what user interface they offer,
-and discuss how these styles of interface affect performance and flexibility of deep learning programs.
+We'll focus on the programming model itself, instead of the implementation. This article isn't about benchmarking
+deep learning libraries. Instead, we divide the libraries into several categories according to the user interface they offer,
+and discuss how interface style affects performance and flexibility of deep learning programs.
 The discussion in this article may not be specific to deep learning, but we will keep deep learning applications as our use-cases and goal of optimization.
 
 ## Symbolic vs. Imperative Programs
@@ -397,9 +397,9 @@ However, using numpy as imperative component might be undesirable, as the parame
 
 ### Small and Big Operations
 
-Combining small and big operations is also possible, and actually we might have a good reason to do it. Consider applications such as changing
-a loss function or adding a few customized layers to an existing structure. What we usually can do is use big operations to compose up the existing
-components, and use smaller operations to build up the new parts.
+It's also possible to combine small and big operations, and there might be a good reason to do it. Consider applications such as changing
+a loss function or adding a few customized layers to an existing structure. What we usually can do is use big operations to compose the existing
+components, and use smaller operations to build the new parts.
 
 Recall Amdahl's law, usually these new components may not be the bottleneck of computation. As the performance critical part is already optimized by
 the bigger operations, it is even OK that we do not optimize these additional small operations at all, or only do a few memory optimization instead
@@ -407,8 +407,8 @@ of operation fusion and directly running them.
 
 ### Choose your Own Flavours
 
-As we have compare the flavours of deep learning programs. The goal of this article is to list these choices and compare their trade-off.
-There may not be a universal solution for all. But you can always choose your flavour, or combine the flavours you like to create
+As we have compare the flavours of deep learning programs. The goal of this topic is to list these choices and compare their trade-offs.
+There may not be a universal solution, but you can always choose your flavour, or combine the flavours you like to create
 more interesting and intelligent deep learning libraries.
 
 ## Contribute to this Topic
