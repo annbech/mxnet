@@ -1,21 +1,18 @@
 # Overview
 
-This design document contains notes that are relevant to the MXNet system design and deep learning libraries in general. We believe that open sourcing this system design note can help general audiences understand the  motivations, benefits and drawbacks of our design choices. This will help deep learning practitioners as well as builders of other deep learning systems.
+This design document describes the design of the MXNet system and deep learning libraries in general. Deep learning practitioners and builders of other deep learning systems can use these system design notes to understand the  strategy, benefits, and drawbacks of our design choices. 
 
 # Deep Learning System Design Concepts
 
-In this section, we will describe general design concepts of Deep Learning systems. We will mainly focus on following 3 areas influencing the design and architecture of a Deep Learning System.
-1. Abstraction
+This section describes general design concepts of deep learning systems. It focuses on the following three factors that influence the design and architecture of a deep learning system:
+
+
+- Abstraction
 2. Optimization
 3. Trade offs
 
-
-&nbsp;
-
-
-&nbsp;
-
-Refer below sections for more details
+For details, see the following:
+  
 * [Programming Models for Deep Learning](http://mxnet.io/architecture/program_model.html)
 * [Dependency Engine for Deep Learning](http://mxnet.io/architecture/note_engine.html)
 * [Optimizing the Memory Consumption in Deep Learning](http://mxnet.io/architecture/note_memory.html)
@@ -24,10 +21,11 @@ Refer below sections for more details
 
 # MXNet System Design and Architecture
 
-In this section, we will describe MXNet System architecture and various components.
+This section describes MXNet system architecture and various components. For details, see the following:
+
 * [MXNet System Overview](http://mxnet.io/architecture/overview.html)
-* [How to read the code](http://mxnet.io/architecture/read_code.html)
-* [Develop and hack MXNet](http://mxnet.io/how_to/develop_and_hack.html)
+* [How to Read the Code](http://mxnet.io/architecture/read_code.html)
+* [Develop and Hack MXNet](http://mxnet.io/how_to/develop_and_hack.html)
 
 
 

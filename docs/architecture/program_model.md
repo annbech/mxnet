@@ -1,6 +1,6 @@
-Programming Models for Deep Learning
-====================================
-There are a lot of deep learning libraries, each comes with its own flavour.
+# Programming Models for Deep Learning
+
+There are a lot of deep learning libraries, each with its own flavor.
 How can each flavour introduced by each library provide advantages or drawbacks in terms of system optimization and user experience?
 This article aims to compare these flavours in terms of programming models, discuss the fundamental advantages and drawbacks
 introduced by these models, and how we can learn from them.
@@ -10,30 +10,32 @@ deep learning libraries. Instead, we will divide the libraries into several cate
 and discuss how these styles of interface affect performance and flexibility of deep learning programs.
 The discussion in this article may not be specific to deep learning, but we will keep deep learning applications as our use-cases and goal of optimization.
 
-Symbolic vs Imperative Programs
--------------------------------
+## Symbolic vs. Imperative Programs
+
 This is the first section to get started, the first thing we are going to compare is symbolic style programs vs imperative style programs.
 If you are a python or c++ programmer, it is likely you are already familiar with imperative programs.
 Imperative style programs conduct the computation as we run them. Most code you write in python is imperative,
 for example, the following numpy snippet.
-```python
-import numpy as np
-a = np.ones(10)
-b = np.ones(10) * 2
-c = b * a
-d = c + 1
-```
+
+    ```python
+    import numpy as np
+    a = np.ones(10)
+    b = np.ones(10) * 2
+    c = b * a
+    d = c + 1
+    ```
 When the programs execute to ```c = b * a```, it runs the actual computation. Symbolic programs are a bit different.
 The following snippet is an equivalent symbolic style program you can write to achieve the same goal of calculating ```d```.
-```python
-A = Variable('A')
-B = Variable('B')
-C = B * A
-D = C + Constant(1)
-# compiles the function
-f = compile(D)
-d = f(A=np.ones(10), B=np.ones(10)*2)
-```
+
+    ```python
+    A = Variable('A')
+    B = Variable('B')
+    C = B * A
+    D = C + Constant(1)
+    # compiles the function
+    f = compile(D)
+    d = f(A=np.ones(10), B=np.ones(10)*2)
+    ```
 The difference in symbolic programs is when ```C = B * A``` is executed, there is no actual computation happening.
 Instead, these operations generate a computation graph (symbolic graph) that represents the computation it described.
 The following picture gives a computation graph to compute ```D```.
@@ -52,18 +54,19 @@ where the configuration file content defines the computation graph.
 
 Now you know the two different programming models, let us start to compare them!
 
-### Imperative Programs are More Flexible
+### Imperative Programs Are More Flexible
 
 This is a general statement that may not apply strictly, but indeed imperative programs are usually more flexible than symbolic programs.
 If you are writing an imperative style programs in python, you are writing in python. However, if you are writing a symbolic program,
 it is different. Consider the following imperative program, think how you can translate this into a symbolic program.
-```python
-a = 2
-b = a + 1
-d = np.zeros(10)
-for i in range(d):
-    d += np.zeros(10)
-```
+
+    ```python
+    a = 2
+    b = a + 1
+    d = np.zeros(10)
+    for i in range(d):
+        d += np.zeros(10)
+    ```
 You can find it is actually not easy, because there is a python for-loop that may not readily supported by the symbolic API.
 If you are writing a symbolic programs in python, you are NOT writing in python.
 Instead, you actually write a domain specific language defined by the symbolic API.
@@ -73,20 +76,20 @@ In that sense, the config-file input libraries are all symbolic.
 Because imperative programs are actually more ```native``` than the symbolic ones, it is easier to use native language features
 and inject them into computation flow. Such as printing out the values in the middle of computation, and use conditioning and loop in host language.
 
-### Symbolic Programs are More Efficient
+### Symbolic Programs Are More Efficient
 
 As we can see from the discussion in previous section, imperative programs are usually more flexible and native to the host language.
 Why larger portion of deep learning libraries chose to be symbolic instead? The main reason is efficiency, both in terms of memory and runtime.
 Let us consider the same toy example used in the beginning of this section.
 
-```python
-import numpy as np
-a = np.ones(10)
-b = np.ones(10) * 2
-c = b * a
-d = c + 1
-...
-```
+    ```python
+    import numpy as np
+    a = np.ones(10)
+    b = np.ones(10) * 2
+    c = b * a
+    d = c + 1
+    ...
+    ```
 
 ![Comp Graph](https://raw.githubusercontent.com/dmlc/web-data/master/mxnet/prog_model/comp_graph.png)
 
@@ -95,11 +98,11 @@ Let us do some math, we need memory for 4 arrays of size 10, that means we will 
 to execute the computation graph, we can re-use memory of C and D, to do the last computation in-place, this will give us ```3 * 10 * 8 = 240```
 bytes instead.
 
-Symbolic programs are more ***restricted***. When the user call ```compile``` on D, the user tells the system that only the value of
+Symbolic programs are more *restricted*. When the user call ```compile``` on D, the user tells the system that only the value of
 ```D``` is needed. The intermediate values of computation, in our case ```C``` is invisible to the user.
 This allows the symbolic programs to safely re-use the memory to do in-place computation.
 
-Imperative programs, on the other hand, need to ***be prepared for all possible futures***. If the above programs is executed in a python console,
+Imperative programs, on the other hand, need to *be prepared for all possible futures*. If the above programs is executed in a python console,
 there is a possibility that any of these variables could be used in the future, this prevents the system to share the memory space of these variables.
 
 Of course this argument is a bit idealized, since garbage collection can happen in imperative programs when things runs out of scope, and memory could be re-used.
@@ -116,64 +119,65 @@ We cannot do that in imperative programs. Because the intermediate value can be 
 some point in the future. The reason that such optimization is possible in symbolic programs, is that we get the entire computation graph, and a clear
 boundary on which value is needed and which is not. While imperative programs only operates on local operations and do not have such a clear boundary.
 
-### Case Study on Backprop and AutoDiff
+### Case Study: Backprop and AutoDiff
 
 In this section, we will compare the two programming models on the problem of auto differentiation, or backpropagation. Gradient calculation is actually
 the problem that all the deep learning library need to solve. It is possible to do gradient calculation in both imperative and symbolic style.
 
 Let us start with the imperative programs. The following snippet is a minimum python code that does automatic differentiation on the toy example we discussed.
-```python
-class array(object) :
-    """Simple Array object that support autodiff."""
-    def __init__(self, value, name=None):
-        self.value = value
-        if name:
-            self.grad = lambda g : {name : g}
 
-    def __add__(self, other):
-        assert isinstance(other, int)
-        ret = array(self.value + other)
-        ret.grad = lambda g : self.grad(g)
-        return ret
+    ```python
+    class array(object) :
+        """Simple Array object that support autodiff."""
+        def __init__(self, value, name=None):
+            self.value = value
+            if name:
+                self.grad = lambda g : {name : g}
 
-    def __mul__(self, other):
-        assert isinstance(other, array)
-        ret = array(self.value * other.value)
-        def grad(g):
-            x = self.grad(g * other.value)
-            x.update(other.grad(g * self.value))
-            return x
-        ret.grad = grad
-        return ret
+        def __add__(self, other):
+            assert isinstance(other, int)
+            ret = array(self.value + other)
+            ret.grad = lambda g : self.grad(g)
+            return ret
 
-# some examples
-a = array(1, 'a')
-b = array(2, 'b')
-c = b * a
-d = c + 1
-print d.value
-print d.grad(1)
-# Results
-# 3
-# {'a': 2, 'b': 1}
-```
+        def __mul__(self, other):
+            assert isinstance(other, array)
+            ret = array(self.value * other.value)
+            def grad(g):
+                x = self.grad(g * other.value)
+                x.update(other.grad(g * self.value))
+                return x
+            ret.grad = grad
+            return ret
 
-In the above program, each array object contains a grad function(it is actually a closure).
-When we run ```d.grad```, it recursively invoke grad function of its inputs, backprops the gradient value back,
+    # some examples
+    a = array(1, 'a')
+    b = array(2, 'b')
+    c = b * a
+    d = c + 1
+    print d.value
+    print d.grad(1)
+    # Results
+    # 3
+    # {'a': 2, 'b': 1}
+    ```
+
+In the preceding program, each array object contains a grad function (it is actually a closure).
+When we run ```d.grad```, it recursively invokes grad function of its inputs, backprops the gradient value back,
 returns the gradient value of each inputs. This may looks a bit complicated. Let us consider the gradient calculation for
 symbolic programs. The program below is an example of doing symbolic gradient calculation of the same task.
 
-```python
-A = Variable('A')
-B = Variable('B')
-C = B * A
-D = C + Constant(1)
-# get gradient node.
-gA, gB = D.grad(wrt=[A, B])
-# compiles the gradient function.
-f = compile([gA, gB])
-grad_a, grad_b = f(A=np.ones(10), B=np.ones(10)*2)
-```
+    ```python
+    A = Variable('A')
+    B = Variable('B')
+    C = B * A
+    D = C + Constant(1)
+    # get gradient node.
+    gA, gB = D.grad(wrt=[A, B])
+    # compiles the gradient function.
+    f = compile([gA, gB])
+    grad_a, grad_b = f(A=np.ones(10), B=np.ones(10)*2)
+    ```
 
 The grad function of D generate a backward computation graph, and return a gradient node ```gA, gB```.
 They corresponds to the red nodes in the following figure.
@@ -211,15 +215,15 @@ problem is to introduce a context variable. We can introduce a no gradient conte
 to switch the gradient calculation off. This brings a bit more restriction into the imperative programs,
 in trading for efficiency.
 
-```python
-with context.NoGradient():
-    a = array(1, 'a')
-    b = array(2, 'b')
-    c = b * a
-    d = c + 1
-```
+    ```python
+    with context.NoGradient():
+        a = array(1, 'a')
+        b = array(2, 'b')
+        c = b * a
+        d = c + 1
+    ```
 
-However, the above example still have many possible futures, which means we cannot do the inplace calculation
+However, the above example still have many possible futures, which means we cannot do the in-place calculation
 to re-use the memory in forward pass(a trick commonly used to reduce GPU memory usage).
 The techniques introduced in this section generates explicit backward pass.
 On some of the tool-kits such as Caffe, CXXNet. Backprop is done implicitly on the same graph.
@@ -239,18 +243,18 @@ Normally, to save a neural net, we need to save two things, a net configuration 
 Being able to checkpoint the configuration is a plus for symbolic programs. Because the symbolic construction phase do not contain computation,
 we can directly serialize the computation graph, and load it back later, this solves the save configuration problem without introducing an additional layer.
 
-```python
-A = Variable('A')
-B = Variable('B')
-C = B * A
-D = C + Constant(1)
-D.save('mygraph')
-...
-D2 = load('mygraph')
-f = compile([D2])
-# more operations
-...
-```
+    ```python
+    A = Variable('A')
+    B = Variable('B')
+    C = B * A
+    D = C + Constant(1)
+    D.save('mygraph')
+    ...
+    D2 = load('mygraph')
+    f = compile([D2])
+    # more operations
+    ...
+    ```
 
 Because imperative programs executes as it describes the computation. We will have to save the code itself as the ```configuration```, or build another
 configuration layer on top of the imperative language.
@@ -266,7 +270,7 @@ It is usually easier to write the parameter updates in imperative styles, especi
 For symbolic programs, the update statement is also executed as we call them. So in that sense, most existing symbolic deep learning libraries
 also falls back to the imperative way to perform the updates, while using the symbolic way to do the gradient calculation.
 
-### There is no Strict Boundary
+### There Is No Strict Boundary
 
 We have made the comparison between two programming styles. Some of the arguments made may not be strictly true, and there is no clear boundaries between
 the programming styles. For example, we can make a (JIT)compiler of python to compile imperative python programs, which gives us some of the advantage of global
@@ -274,33 +278,36 @@ information hold in the symbolic programs. However, most of the principles holds
 libraries.
 
 
-Big vs Small Operations
------------------------
+## Big vs. Small Operations
+
 Now we have pass through the battlefield between symbolic and imperative programs. Let us start to talk about the operations supported by deep learning libraries.
 Usually there are two types of operations supported by different deep learning libraries.
 - The big layer operations such as FullyConnected, BatchNormalize
 - The small operations such as element wise addition, multiplications.
 The libraries like CXXNet, Caffe support layer level operations. While the libraries like Theano, Minerva support fine grained operations.
 
-### Smaller Operations can be More Flexible
+### Smaller Operations Can Be More Flexible
 This is quite natural, in a sense that we can always use smaller operations to compose bigger operations.
 For example, the sigmoid unit can be simply be composed by division and exponential.
-```python
-sigmoid(x) = 1.0 / (1.0 + exp(-x))
-```
+
+    ```python
+    sigmoid(x) = 1.0 / (1.0 + exp(-x))
+    ```
 If we have the smaller operations as building blocks, we can express most of the problems we want.
 For readers who are more familiar with CXXNet, Caffe style layers. These operations is not different from a layer, except that they are smaller.
-```python
-SigmoidLayer(x) = EWiseDivisionLayer(1.0, AddScalarLayer(ExpLayer(-x), 1.0))
-```
+
+    ```python
+    SigmoidLayer(x) = EWiseDivisionLayer(1.0, AddScalarLayer(ExpLayer(-x), 1.0))
+    ```
 So the above expression becomes composition of three layers, with each defines their forward and backward(gradient) function.
 This offers us an advantage to build new layers quickly, because we only need to compose these things together.
 
-### Big Operations are More Efficient
+### Big Operations Are More Efficient
 As you can see directly composing up sigmoid layers means we need to have three layers of operation, instead of one.
-```python
-SigmoidLayer(x) = EWiseDivisionLayer(1.0, AddScalarLayer(ExpLayer(-x), 1.0))
-```
+
+    ```python
+    SigmoidLayer(x) = EWiseDivisionLayer(1.0, AddScalarLayer(ExpLayer(-x),   1.0))
+    ```
 This will create overhead in terms of computation and memory (which could be optimized, with cost).
 
 So the libraries like CXXNet, Caffe take a different approach. To support more coarse grained operations
@@ -342,8 +349,8 @@ however we have only seen this trick in C++ so far.
 The expression template libraries creates a middle ground between python operations and hand crafted big kernels. To allow C++ users to craft efficient big
 operations by composing smaller operations together. Which is also a choice worth considering.
 
-Mix The Flavours Together
--------------------------
+## Mix The Flavours Together
+
 Now we have compared the programming models, now comes the question of which you might want to choose.
 Before we doing so, we should emphasize the the comparison made in this article may not necessary have big impact
 depending on where the problems are.
@@ -372,16 +379,17 @@ while the gradient calculations can be done more effectively in symbolic program
 
 The mix of programs is actually happening in existing symbolic libraries, because python itself is imperative.
 For example, the following program mixes the symbolic part together with numpy(which is imperative).
-```python
-A = Variable('A')
-B = Variable('B')
-C = B * A
-D = C + Constant(1)
-# compiles the function
-f = compile(D)
-d = f(A=np.ones(10), B=np.ones(10)*2)
-d = d + 1.0
-```
+
+    ```python
+    A = Variable('A')
+    B = Variable('B')
+    C = B * A
+    D = C + Constant(1)
+    # compiles the function
+    f = compile(D)
+    d = f(A=np.ones(10), B=np.ones(10)*2)
+    d = d + 1.0
+    ```
 The idea is that the symbolic graphs are compiled into a function that can be executed imperatively. Whose internal is a blackbox to the user.
 This is exactly like writing c++ programs and exposing them to python, which we commonly do.
 
@@ -403,12 +411,12 @@ As we have compare the flavours of deep learning programs. The goal of this arti
 There may not be a universal solution for all. But you can always choose your flavour, or combine the flavours you like to create
 more interesting and intelligent deep learning libraries.
 
-Contribution to this Note
--------------------------
-This note is part of our effort to [open-source system design notes](index.md)
-for deep learning libraries. You are more than welcome to contribute to this Note, by submitting a pull request.
+## Contribute to this Topic
 
-# Recommended next steps
+This topic is part of our effort to provide [open-source system design notes](index.md)
+for deep learning libraries. We welcome your contributions.
+
+## Next Steps
 
 * [Dependency Engine for Deep Learning](http://mxnet.io/architecture/note_engine.html)
 * [Squeeze the Memory Consumption of Deep Learning](http://mxnet.io/architecture/note_memory.html)
