@@ -5,17 +5,17 @@ What are the advantages and drawbacks of each library in terms of system optimiz
 This topic compares the programming models, discusses the fundamental advantages and drawbacks
 introduced by the models, and explores how we can learn from them.
 
-We'll focus on the programming model itself, instead of the implementation. This article isn't about benchmarking
-deep learning libraries. Instead, we divide the libraries into several categories according to the user interface they offer,
+This article isn't about benchmarking
+deep learning libraries. We'll focus on the programming models themselves, instead of the implementations.  We divide the libraries into several categories according to the user interface they offer,
 and discuss how interface style affects performance and flexibility of deep learning programs.
-The discussion in this article may not be specific to deep learning, but we will keep deep learning applications as our use-cases and goal of optimization.
+The discussion might not be specific to deep learning, but we will use deep learning applications as our use cases and the goal of optimization.
 
 ## Symbolic vs. Imperative Programs
 
-This is the first section to get started, the first thing we are going to compare is symbolic style programs vs imperative style programs.
-If you are a python or c++ programmer, it is likely you are already familiar with imperative programs.
-Imperative style programs conduct the computation as we run them. Most code you write in python is imperative,
-for example, the following numpy snippet.
+First let's compare symbolic-style programs vs. imperative-style programs.
+If you are a Python or C++ programmer, it is likely you are already familiar with imperative programs.
+Imperative-style programs conduct computation as we run them. Most code you write in Python is imperative,
+as is the following NumPpy snippet.
 
     ```python
     import numpy as np
@@ -24,8 +24,10 @@ for example, the following numpy snippet.
     c = b * a
     d = c + 1
     ```
-When the programs execute to ```c = b * a```, it runs the actual computation. Symbolic programs are a bit different.
-The following snippet is an equivalent symbolic style program you can write to achieve the same goal of calculating ```d```.
+When the program executes ```c = b * a```, it runs the actual computation. 
+
+Symbolic programs are a bit different.
+The following snippet is an equivalent symbolic-style program that achieves the same goal of calculating ```d```.
 
     ```python
     A = Variable('A')
@@ -36,29 +38,29 @@ The following snippet is an equivalent symbolic style program you can write to a
     f = compile(D)
     d = f(A=np.ones(10), B=np.ones(10)*2)
     ```
-The difference in symbolic programs is when ```C = B * A``` is executed, there is no actual computation happening.
+The difference in symbolic programs is that when ```C = B * A``` is executed, no computation occurs.
 Instead, these operations generate a computation graph (symbolic graph) that represents the computation it described.
-The following picture gives a computation graph to compute ```D```.
+The following figure shows a computation graph to compute ```D```.
 
 ![Comp Graph](https://raw.githubusercontent.com/dmlc/web-data/master/mxnet/prog_model/comp_graph.png)
 
-Most symbolic style programs contain, either explicitly or implicitly, a ```compile``` step.
+Most symbolic-style programs contain, either explicitly or implicitly, a ```compile``` step.
 This converts the computation graph into a function that can be called.
-Then the real computation happens at the last step of the code. The major characteristic of symbolic programs
-is the clear separation between the computation graph definition step, and the compile, running step.
+Computation occurs in the last step of the code. The major characteristic of symbolic programs
+is the clear separation between defining the computation graph and compiling.
 
-Examples of imperative style deep learning libraries include Torch, Chainer and Minerva.
-While the examples of symbolic style deep learning libraries include Theano, CGT and Tensorflow.
-Libraries that use configuration files like cxxnet, caffe can also be viewed as symbolic style libraries,
-where the configuration file content defines the computation graph.
+Examples of imperative-style deep learning libraries include Torch, Chainer, and Minerva.
+Examples of symbolic-style deep learning libraries include Theano, CGT, and Tensorflow.
+Libraries that use configuration files, like CXXNet and Caffe, can also be viewed as symbolic-style libraries,
+where the content in the configuration file defines the computation graph.
 
-Now you know the two different programming models, let us start to compare them!
+Now that you understand the two different programming models, let's start to compare them.
 
 ### Imperative Programs Are More Flexible
 
-This is a general statement that may not apply strictly, but indeed imperative programs are usually more flexible than symbolic programs.
-If you are writing an imperative style programs in python, you are writing in python. However, if you are writing a symbolic program,
-it is different. Consider the following imperative program, think how you can translate this into a symbolic program.
+This is a general statement that might not apply strictly, but, indeed, imperative programs are usually more flexible than symbolic programs.
+If you are writing an imperative-style program in Python, you are writing in Python. If you are writing a symbolic program,
+it is different. Consider the following imperative program, and think about how you can translate this into a symbolic program.
 
     ```python
     a = 2
